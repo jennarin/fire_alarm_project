@@ -21,12 +21,15 @@ GND                   GND                     GND                 GND
 #define SPRINKLER_ON_TIME 3000      //3 seconds Sprinkler on time
 
 TridentTD_LineNotify myLINE(LINE_TOKEN);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 unsigned long previousTime = millis();
 
 int sensorValue;
-int isSmokepin = D5;
-int isFlamePin = D7;
+int LED_ALERT = D0;
+int LED_OK = D3;
+int SMOKE_PIN = D5;
+int FLAME_PIN = D7;
 int RELAY_PIN = D8;
 
 
@@ -39,11 +42,22 @@ bool flame1 = 0;
 
 void setup() {
   Serial.begin(115200);
-  pinMode(isSmokepin, INPUT);
-  pinMode(isFlamePin, INPUT);
+  pinMode(SMOKE_PIN, INPUT);
+  pinMode(FLAME_PIN, INPUT);
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(RELAY_PIN, OUTPUT);
+  pinMode(LED_OK, OUTPUT);
+  pinMode(LED_ALERT, OUTPUT);
+
+  lcd.begin(16, 2);
+  lcd.backlight();
+  lcd.setCursor(4, 0);
+  lcd.print("STATUS OK");
+
   WiFi.begin(ssid, pass);
+
+  digitalWrite(LED_OK, HIGH);
+  digitalWrite(LED_ALERT, LOW);
   digitalWrite(RELAY_PIN, LOW);
 }
 
@@ -58,14 +72,28 @@ void loop() {                     // Wait for 1 second
 
   if (flame1 == 1 || smoke1 == 1 || smoke2 == 1) {
     myLINE.notify("Fire! Fire! Fire!");  //  Messenger to line notification
+
     digitalWrite(BUZZER_PIN, HIGH);
     Serial.println("Warnig, Warning, Warning");
+
+    lcd.setCursor(3, 0);
+    lcd.print("FIRE DETECTED!!");
+
     if (millis() - previousTime > SPRINKLER_START_DELAY) {
       digitalWrite(RELAY_PIN, HIGH);
       delay(SPRINKLER_ON_TIME);
     }
     delay(3000);
+  } else {
+    analogWrite(BUZZER_PIN, LOW);
+    digitalWrite(RELAY_PIN, LOW);
+    digitalWrite(LED_OK, HIGH);
+    digitalWrite(LED_ALERT, LOW);
+    lcd.setCursor(0, 0);
+    lcd.print("    STATUS OK    ");
+    previousTime = millis();
   }
+
 
   delay(2000);
 }
@@ -73,7 +101,7 @@ void loop() {                     // Wait for 1 second
 /////////////////////////////////////////////////
 
 void smokeDetect() {
-  isSmoke = digitalRead(isSmokepin);
+  isSmoke = digitalRead(SMOKE_PIN);
   if (isSmoke == LOW) {
     smoke1 = 1;
     Serial.println("SMOKE, SMOKE, SMOKE");
@@ -84,13 +112,12 @@ void smokeDetect() {
 }
 
 void flameDetect() {
-  isFlame = digitalRead(isFlamePin);
+  isFlame = digitalRead(FLAME_PIN);
   if (isFlame == LOW) {
     flame1 = 1;
     Serial.println("FLAME, FLAME, FLAME");
     Serial.println(BUZZER_PIN);
-
-    analogWrite(BUZZER_PIN, 50);
+    digitalWrite(BUZZER_PIN, HIGH);
   } else {
     flame1 = 0;
     digitalWrite(RELAY_PIN, LOW);
@@ -103,7 +130,10 @@ void smokeRead() {
   Serial.println(sensorValue);
   if (sensorValue > 380) {
     smoke2 = 1;
-    Serial.println("SMOKE, SMOKE, SMOKE");
+    Serial.println("WARNING SMOKE TOO HIGH");
+
+    lcd.setCursor(3, 0);
+    lcd.print("SMOKE DETECTED!!");
   } else {
     smoke2 = 0;
     Serial.println("NO SMOKE");
