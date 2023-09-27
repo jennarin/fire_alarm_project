@@ -28,10 +28,10 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 unsigned long previousTime = millis();
 
 int sensorValue;
-int LED_ALERT = D0;
+int LED_ALERT = D5;
 int LED_OK = D3;
 int RELAY_PIN = D4;
-int SMOKE_PIN = D5;
+int SMOKE_PIN = 10;
 int FLAME_PIN = D7;
 
 
@@ -42,10 +42,14 @@ bool smoke1 = 0;
 bool smoke2 = 0;
 bool flame1 = 0;
 
+void flameInterruptHandler()
+{
+  
+}
 void setup() {
   Serial.begin(115200);
   pinMode(SMOKE_PIN, INPUT);
-  pinMode(FLAME_PIN, INPUT);
+  pinMode(FLAME_PIN, INPUT_PULLUP);
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(RELAY_PIN, OUTPUT);
   pinMode(LED_OK, OUTPUT);
