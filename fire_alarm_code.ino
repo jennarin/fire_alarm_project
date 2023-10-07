@@ -70,7 +70,6 @@ void setup()
   //   delay(500);
   //   Serial.print(".");
   // }
-
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
@@ -90,6 +89,20 @@ void loop()
   Serial.println(flame1);
   Serial.println(smoke1);
   Serial.println(smoke2);
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    lcd.clear();
+    lcd.setCursor(0, 1);
+    lcd.print("WiFi is connected    ");
+  }
+
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+    lcd.setCursor(0, 1);
+    lcd.print("WiFi is not connected    ");
+  }
 
   if (flame1 == 1 || smoke1 == 1 || smoke2 == 1)
   {
