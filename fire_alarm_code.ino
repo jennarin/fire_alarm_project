@@ -3,8 +3,8 @@
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
-#define ssid "xanny"                                              
-#define pass "6410110082"                                         
+#define ssid "wifi"                                              
+#define pass "password"                                         
 #define LINE_TOKEN "shhXvGPgs1oteDTfteMWaqRix3aCaKO6DttOateAp15"  
 
 #define SPRINKLER_START_DELAY 3000  
@@ -17,20 +17,13 @@ TridentTD_LineNotify myLINE(LINE_TOKEN);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 unsigned long previousTime = millis();
-
 int sensorValue;
 int LED_OK = D3;
 int RELAY_PIN = D4;
 int LED_ALERT = D5;
 int BUZZER_PIN = D6;
 int FLAME_PIN = D7;
-
-
 int isFlame = HIGH;
-int isSmoke = HIGH;
-
-bool smoke1 = 0;
-bool smoke2 = 0;
 bool flame1 = 0;
 
 void setup() {
@@ -65,8 +58,6 @@ void loop() {
   digitalWrite(BUZZER_PIN, LOW); 
   flameDetect();
   Serial.println(flame1);
-  Serial.println(smoke1);
-  Serial.println(smoke2);
   if (WiFi.status() == WL_CONNECTED) {
     lcd.clear();
     lcd.setCursor(0, 1);
@@ -159,4 +150,5 @@ void flameDetect() {
     Serial.println("no flame");
   }
 }
+
 
